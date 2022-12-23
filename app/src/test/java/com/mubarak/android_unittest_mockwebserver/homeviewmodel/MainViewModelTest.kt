@@ -2,15 +2,14 @@ package com.mubarak.android_unittest_mockwebserver.homeviewmodel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
+import com.google.gson.Gson
 import com.mubarak.android_unittest_mockwebserver.MockResponseFileReader
 import com.mubarak.android_unittest_mockwebserver.model.HomeModelData
 import com.mubarak.android_unittest_mockwebserver.network.RetrofitClient
 import com.mubarak.android_unittest_mockwebserver.repository.MainRepository
 import com.mubarak.android_unittest_mockwebserver.utils.Resource
-import com.mubarak.android_unittest_mockwebserver.utils.Status
 import com.mubarak.android_unittest_mockwebserver.viewmodel.MainViewModel
 import junit.framework.Assert
-import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -21,7 +20,6 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import org.mockito.junit.MockitoJUnitRunner
 import java.net.HttpURLConnection
@@ -88,6 +86,30 @@ class MainViewModelTest {
 
         //expected mock web server response and api response have a success contains is equal
         assertEquals(expect, actualResponse.body()?.status?.contains("success"))
+    }
+
+    /**
+     * Another way
+     */
+    @Test
+    fun `checked api calling data is success response`() {
+        val expectedResult = MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_OK)
+            .setBody(MockResponseFileReader("success_response.json").content)
+        mockWebServer.enqueue(expectedResult)
+
+        //val expect = expectedResult.getBody()?.readUtf8()?.contains("success", true)
+
+        val expect = Gson().fromJson<HomeModelData>(
+            expectedResult.getBody()?.readUtf8().toString(),
+            HomeModelData::class.java
+        )
+
+        //make api calling
+        val actualResponse = repository.getEmployeeDetails().execute()
+
+        //expected mock web server response and api response have a success contains is equal
+        assertEquals(expect.status, actualResponse.body()?.status)
     }
 
     /**
