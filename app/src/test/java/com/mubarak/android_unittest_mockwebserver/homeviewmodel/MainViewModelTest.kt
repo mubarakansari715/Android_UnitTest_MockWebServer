@@ -64,8 +64,8 @@ class MainViewModelTest {
      */
     @Test
     fun `read sample success json file`() {
-        val reader = MockResponseFileReader("success_response.json")
-        Assert.assertNotNull(reader.content)
+        val reader = MockResponseFileReader("success_response.json").content
+        Assert.assertNotNull(reader)
     }
 
     /***
